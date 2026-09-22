@@ -160,7 +160,8 @@ GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o build/ProxyToClas
 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o build/ProxyToClash_linux_arm64 .
 ```
 
-一键脚本：Windows 跑 `scripts/build_win.bat`，Linux 跑 `sh scripts/build_all.sh`。
+一键脚本：Windows 跑 `scripts/build_win.bat`（单平台）
+或 `scripts/build_all.bat`（一次出全平台）；Linux 跑 `sh scripts/build_all.sh`。
 产物都在 `build/`（该目录已被 git 忽略，不会误提交）。
 
 ---
