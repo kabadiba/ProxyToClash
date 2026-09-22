@@ -1,0 +1,10 @@
+# 构建产物（不提交）
+build/
+
+# 运行时生成（含密钥/动态内容，不提交）
+config.json
+ips.yaml
+
+# 临时/系统文件
+*.tmp
+__pycache__/

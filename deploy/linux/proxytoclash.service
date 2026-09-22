@@ -1,0 +1,31 @@
+# ProxyToClash systemd 服务（Linux 部署用）
+# 用法：
+#   0) 从 build/ 拷二进制到 /opt/ProxyToClash 并改名 ProxyToClash，例如：
+#        mkdir -p /opt/ProxyToClash && cp build/ProxyToClash_linux_amd64 /opt/ProxyToClash/ProxyToClash
+#   1) 先手动跑一次生成 config.json 并填入 api_url：
+#        cd /opt/ProxyToClash && ./ProxyToClash   # 生成模板后 Ctrl+C
+#        编辑 config.json 填 api_url
+#   2) sudo cp proxytoclash.service /etc/systemd/system/
+#   3) 编辑下面 ExecStart、WorkingDirectory，改成本机实际
+#   4) sudo systemctl daemon-reload
+#      sudo systemctl enable --now proxytoclash
+#   5) 查状态: sudo systemctl status proxytoclash   看日志: journalctl -u proxytoclash -f
+#
+# 局域网放行(供安卓拉取):
+#   sudo ufw allow 8080/tcp
+
+[Unit]
+Description=ProxyToClash - 拉取代理IP并供局域网Clash拉取
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ProxyToClash
+ExecStart=/opt/ProxyToClash/ProxyToClash -config /opt/ProxyToClash/config.json
+Restart=always
+RestartSec=10
+User=root
+
+[Install]
+WantedBy=multi-user.target

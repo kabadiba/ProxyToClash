@@ -1,0 +1,61 @@
+# ================================================================
+# 三端共用的 Clash 完整配置模板（Windows / Linux / Android）
+# 使用场景：代理IP来自"动态短效提取API"，由 ProxyToClash(Go转换器) 转成 ips.yaml
+#           并通过局域网HTTP暴露，三端内核定时远程拉取。
+#
+# 只需改两处：
+#   1) url: 填 ProxyToClash 所在设备的地址(见下方注释)
+#   2) secret: 改一个你自己的随机token
+# 然后整份粘贴进你的客户端(clash-verge / mihomo / Clash Meta for Android)即可。
+# ================================================================
+
+mode: rule
+
+# ---------- 本机控制 API（用于"定时/手动强制切换IP"）----------
+# Windows / Linux 本地用 127.0.0.1；Android 一般不需要，留空即可。
+external-controller: 127.0.0.1:9090
+secret: "change-me-to-a-random-token"
+
+# ---------- provider：从转换器拉取 IP 列表 ----------
+proxy-providers:
+  ips:
+    type: http
+    # ★★ 关键：改这一行 ★★
+    #   Windows/Linux（转换器就在本机）:  http://127.0.0.1:8080/ips.yaml
+    #   Android（已连宿主机所在WiFi）:   http://<宿主机局域网IP>:8080/ips.yaml
+    #     例: http://192.168.1.100:8080/ips.yaml
+    url: "http://127.0.0.1:8080/ips.yaml"
+    interval: 60             # 拉取间隔。建议 60s 且 ≥ 转换器 on_demand_min_sec，
+                             # 这样每次拉取都恰好触发转换器"按需实时提取"，拿到最新IP。
+    path: ./providers/ips.yaml
+    health-check:            # 内核自己定期测活，失效的自动不用
+      enable: true
+      url: "http://www.baidu.com/generate_204"   # 国内可达、极轻量，勿用外网地址
+      interval: 60
+
+# ================================================================
+# 策略组：自动/手动切换策略都预置好，"策略入口"用下拉选择切换
+#   · 自动测速选优 url-test   → 内核定期测延迟，自动选最快/可用
+#   · 手动/定时强制切换        → 通过下方 PATCH 命令指定某个IP
+# ================================================================
+proxy-groups:
+  - name: "策略入口"
+    type: select              # 在 Clash 界面点击"策略入口"下拉，即可任选策略
+    proxies:
+      - "自动测速选优"
+
+  - name: "自动测速选优"
+    type: url-test
+    interval: 60
+    tolerance: 50
+    url: "http://www.baidu.com/generate_204"
+    use: [ips]
+
+rules:
+  # 本机回环与局域网直连：避免拉取 provider 的请求被当前(可能故障的)代理IP绑架
+  - IP-CIDR,127.0.0.0/8,DIRECT
+  - IP-CIDR,192.168.0.0/16,DIRECT
+  # ★★ TUN/全局接管下务必放行服务商"提取API"域名直连(把下面换成你的真实服务商域名/IP)；
+  #    否则代理故障时，ProxyToClash 调提取API会被代理劫持 → 一直拉不到新IP → 无法自愈。
+  - DOMAIN-SUFFIX,your-api-provider.com,DIRECT
+  - MATCH,策略入口

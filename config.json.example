@@ -1,0 +1,13 @@
+{
+  "api_url": "http://PASTE_YOUR_API_URL_HERE",
+  "proxy_type": "http",
+  "proxy_username": "",
+  "proxy_password": "",
+  "refresh_interval_sec": 300,
+  "on_demand": true,
+  "on_demand_min_sec": 30,
+  "bypass_proxy": false,
+  "out_file": "ips.yaml",
+  "http_host": "0.0.0.0",
+  "http_port": 8080
+}

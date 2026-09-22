@@ -1,0 +1,23 @@
+开机自启方法（Windows，用打包好的 build\ProxyToClash.exe）
+
+方式一：任务计划程序（推荐，开机隐藏后台运行）
+----------------------------------------------------
+1. Win+R 运行 taskschd.msc 打开"任务计划程序"
+2. 右侧"创建任务"：
+   - 常规：名称 ProxyToClash；勾选"使用最高权限运行"
+   - 触发器：新建 → 开始任务选"计算机启动时"，勾选"延迟任务时间 15 秒"
+   - 操作：新建 → 程序
+         D:\work\workgit\github.com\ProxyToClash\build\ProxyToClash.exe
+       （起始于： D:\work\workgit\github.com\ProxyToClash）
+   - 条件：取消勾选"只有在计算机使用交流电时才启动此任务"
+   - 设置：勾选"如果任务失败，按每1分钟重新启动一次"（自愈）
+3. 保存即可。
+
+方式二：快捷方式放入启动文件夹
+----------------------------------------------------
+1. 建 build\ProxyToClash.exe 的快捷方式
+2. 放到 shell:startup（Win+R 输入 shell:startup 打开）
+3. 缺点：会弹一个窗口。
+
+先手动验证：双击 deploy\windows\start.bat（或直接双击 build\ProxyToClash.exe），
+浏览器打开 http://127.0.0.1:8080/ips.yaml 能看到内容，再配开机自启。
